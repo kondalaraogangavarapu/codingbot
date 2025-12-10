@@ -77,15 +77,53 @@ app.get('/api/user', verifyKeycloakToken, (req, res) => {
   res.json({ user: req.user });
 });
 
+// Helper function to get GitHub token from various sources
+const getGitHubToken = async (req) => {
+  // Method 1: Try to get token from Keycloak token introspection (for GitHub IdP)
+  try {
+    const introspectResponse = await axios.post(
+      `${KEYCLOAK_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/token/introspect`,
+      `token=${req.token}`,
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Bearer ${req.token}`
+        }
+      }
+    );
+    
+    // Check for GitHub token in the introspection response
+    if (introspectResponse.data.github_access_token) {
+      return introspectResponse.data.github_access_token;
+    }
+  } catch (error) {
+    console.log('Token introspection failed, trying other methods...');
+  }
+
+  // Method 2: Check user attributes from userinfo endpoint
+  if (req.user.github_token) {
+    return req.user.github_token;
+  }
+
+  // Method 3: Check for custom attributes (array format)
+  if (req.user.attributes && req.user.attributes.github_token) {
+    return Array.isArray(req.user.attributes.github_token) 
+      ? req.user.attributes.github_token[0] 
+      : req.user.attributes.github_token;
+  }
+
+  // Method 4: Fallback to environment variable
+  return process.env.GITHUB_TOKEN;
+};
+
 // Get user repositories from GitHub
 app.get('/api/repos', verifyKeycloakToken, async (req, res) => {
   try {
-    // Check if user has GitHub token stored in Keycloak
-    const githubToken = req.user.github_token || process.env.GITHUB_TOKEN;
+    const githubToken = await getGitHubToken(req);
     
     if (!githubToken) {
       return res.status(400).json({ 
-        error: 'GitHub token not found. Please configure GitHub integration in your profile.' 
+        error: 'GitHub token not found. Please ensure you have logged in with GitHub through Keycloak or configure a GitHub token in your profile.' 
       });
     }
 
@@ -136,11 +174,11 @@ app.get('/api/repos', verifyKeycloakToken, async (req, res) => {
 // Get GitHub user info
 app.get('/api/github/user', verifyKeycloakToken, async (req, res) => {
   try {
-    const githubToken = req.user.github_token || process.env.GITHUB_TOKEN;
+    const githubToken = await getGitHubToken(req);
     
     if (!githubToken) {
       return res.status(400).json({ 
-        error: 'GitHub token not found. Please configure GitHub integration in your profile.' 
+        error: 'GitHub token not found. Please ensure you have logged in with GitHub through Keycloak or configure a GitHub token in your profile.' 
       });
     }
 

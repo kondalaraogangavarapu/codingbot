@@ -88,9 +88,23 @@ Edit `client/.env`:
 VITE_API_URL=http://localhost:3001
 ```
 
-### 4. Keycloak Setup
+### 4. Keycloak + GitHub Setup
 
-#### Create a Keycloak Client
+#### Recommended: GitHub as Identity Provider (Best Experience)
+
+For the best user experience, configure GitHub as an identity provider in Keycloak. This allows users to log in with their GitHub accounts and automatically provides GitHub API access.
+
+**📖 See [KEYCLOAK_GITHUB_SETUP.md](./KEYCLOAK_GITHUB_SETUP.md) for detailed setup instructions.**
+
+**Quick Setup:**
+1. Create GitHub OAuth App with callback: `http://localhost:8080/realms/YOUR_REALM/broker/github/endpoint`
+2. Add GitHub as Identity Provider in Keycloak
+3. Configure token storage and mappers
+4. Users can now login with GitHub and get automatic repository access!
+
+#### Alternative: Manual Keycloak Client Setup
+
+If you prefer not to use GitHub as an identity provider:
 
 1. Log in to your Keycloak Admin Console
 2. Select your realm (or create a new one)
@@ -99,34 +113,23 @@ VITE_API_URL=http://localhost:3001
    - **Client ID**: `github-repo-viewer`
    - **Client Type**: `OpenID Connect`
    - **Client authentication**: `Off` (public client)
-5. Set **Valid redirect URIs**:
-   - `http://localhost:5173/*`
-   - `http://localhost:3001/*`
+5. Set **Valid redirect URIs**: `http://localhost:5173/*`
 6. Set **Web origins**: `http://localhost:5173`
-
-#### Configure User Attributes (Optional)
-
-To store GitHub tokens per user:
-1. Go to **User attributes** in your realm settings
-2. Add a custom attribute: `github_token`
-3. Users can set their GitHub personal access token in their profile
 
 ### 5. GitHub Token Setup
 
-You have two options for GitHub integration:
+#### Option A: GitHub Identity Provider (Recommended ⭐)
+- Users log in with GitHub through Keycloak
+- GitHub tokens are automatically obtained and stored
+- No manual token configuration needed!
 
-#### Option A: Global Token (Simpler)
+#### Option B: Global Token (Simpler)
 Set `GITHUB_TOKEN` in your server `.env` file with a GitHub personal access token.
 
-#### Option B: Per-User Tokens (Recommended)
+#### Option C: Per-User Tokens
 1. Each user sets their GitHub token in their Keycloak profile
 2. Go to Keycloak Account Console → Personal Info → Attributes
 3. Add attribute: `github_token` with their personal access token
-
-To create a GitHub Personal Access Token:
-1. Go to GitHub → Settings → Developer settings → Personal access tokens
-2. Generate new token with `repo` scope
-3. Copy the token and use it in your configuration
 
 ## Running the Application
 
