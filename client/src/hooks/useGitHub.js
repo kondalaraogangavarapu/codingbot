@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { apiService } from '../services/api';
+import { githubAPI } from '../services/api';
 import { useKeycloak } from './useKeycloak.jsx';
 
 export const useGitHub = () => {
@@ -15,11 +15,11 @@ export const useGitHub = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await apiService.getRepos();
-      setRepos(response.data.repos);
+      const repos = await githubAPI.getRepositories();
+      setRepos(repos);
     } catch (err) {
       console.error('Error fetching repositories:', err);
-      setError(err.response?.data?.error || 'Failed to fetch repositories');
+      setError(err.response?.data?.message || err.message || 'Failed to fetch repositories');
     } finally {
       setLoading(false);
     }
@@ -29,8 +29,8 @@ export const useGitHub = () => {
     if (!authenticated) return;
 
     try {
-      const response = await apiService.getGitHubUser();
-      setGithubUser(response.data.githubUser);
+      const user = await githubAPI.getUserProfile();
+      setGithubUser(user);
     } catch (err) {
       console.error('Error fetching GitHub user:', err);
       // Don't set error for GitHub user fetch as it's optional

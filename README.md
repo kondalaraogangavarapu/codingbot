@@ -1,26 +1,27 @@
 # 🚀 GitHub Repository Viewer with Keycloak Authentication
 
-A simple web application that allows users to authenticate via Keycloak and view their GitHub repositories. Built with React, Express.js, and Keycloak integration.
+A frontend-only web application that uses Keycloak with GitHub identity provider to authenticate users and directly access GitHub repositories. No backend required!
 
 ## ✨ Features
 
-- **🔐 Keycloak Authentication**: Secure OAuth2/OpenID Connect authentication
+- **🔐 GitHub OAuth via Keycloak**: Direct GitHub authentication through Keycloak identity provider
 - **📱 Modern React UI**: Clean, responsive interface built with React 18
-- **🔗 GitHub Integration**: View and manage your GitHub repositories
+- **🔗 Direct GitHub API**: Frontend directly calls GitHub APIs using tokens from Keycloak
 - **🚀 Fast Development**: Vite for lightning-fast frontend development
+- **🐳 Simple Deployment**: Single container with nginx serving static files
 
 ## 🛠️ Tech Stack
 
-- **Backend**: Node.js, Express.js, Keycloak Node.js Adapter
 - **Frontend**: React 18, Vite, Keycloak JS
-- **Authentication**: Keycloak (OAuth2/OpenID Connect)
-- **Containerization**: Docker
+- **Authentication**: Keycloak with GitHub Identity Provider
+- **API**: Direct GitHub REST API calls
+- **Deployment**: Docker with nginx
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 - Docker and Docker Compose
-- Keycloak running on localhost:8080
+- Keycloak running on localhost:8080 with GitHub identity provider configured
 
 ### 1. Clone and Run
 
@@ -28,9 +29,6 @@ A simple web application that allows users to authenticate via Keycloak and view
 # Clone the repository
 git clone https://github.com/kondalaraogangavarapu/codingbot.git
 cd codingbot
-
-# Optional: Add your GitHub token to .env file
-# GITHUB_TOKEN=your_github_token_here
 
 # Build and run with Docker
 docker compose up --build
@@ -40,16 +38,26 @@ docker compose up --build
 
 - **🌐 Main Application**: http://localhost:3001
 
-### 3. Keycloak Configuration
+### 3. Keycloak Configuration Required
 
-Make sure your Keycloak has a client configured with:
+Your Keycloak must be configured with:
+
+#### Client Configuration:
 - **Client ID**: `github-repo-viewer`
+- **Client Type**: Public
 - **Valid Redirect URIs**: `http://localhost:3001/*`
 - **Web Origins**: `http://localhost:3001`
+- **Standard Flow**: Enabled
+
+#### GitHub Identity Provider:
+- **Provider**: GitHub
+- **Client ID**: Your GitHub OAuth App Client ID
+- **Client Secret**: Your GitHub OAuth App Client Secret
+- **Default Scopes**: `repo user:email`
 
 ## 📱 Usage
 
-1. **Login**: Click "Login with Keycloak" to authenticate
+1. **Login**: Click "🐙 Login with GitHub" to authenticate via Keycloak's GitHub provider
 2. **View Repositories**: Your GitHub repositories will be displayed after login
 3. **Repository Details**: Each card shows:
    - Repository name and description
@@ -61,27 +69,36 @@ Make sure your Keycloak has a client configured with:
 
 ## 🔧 Configuration
 
-### Environment Variables
+### Frontend Environment Variables
 
-Edit the `.env` file to configure:
+Edit `client/.env` to configure:
 
 ```bash
-# GitHub Personal Access Token (optional)
-# Get one from: https://github.com/settings/tokens
-# Required scopes: repo
-GITHUB_TOKEN=your_github_token_here
-
-# Session secret (change this in production)
-SESSION_SECRET=your-secret-key-here
+# Keycloak Configuration
+VITE_KEYCLOAK_URL=http://localhost:8080
+VITE_KEYCLOAK_REALM=master
+VITE_KEYCLOAK_CLIENT_ID=github-repo-viewer
 ```
 
-### Keycloak Setup
+### Keycloak Setup Steps
 
-1. Create a new client in Keycloak admin console
-2. Set client ID to `github-repo-viewer`
-3. Configure redirect URIs: `http://localhost:3001/*`
-4. Set web origins: `http://localhost:3001`
-5. Enable "Standard Flow" and "Direct Access Grants"
+1. **Create GitHub OAuth App**:
+   - Go to GitHub Settings > Developer settings > OAuth Apps
+   - Create new OAuth App
+   - Authorization callback URL: `http://localhost:8080/realms/master/broker/github/endpoint`
+
+2. **Configure Keycloak GitHub Identity Provider**:
+   - Login to Keycloak admin console
+   - Go to Identity Providers > Add provider > GitHub
+   - Enter your GitHub OAuth App credentials
+   - Set default scopes: `repo user:email`
+
+3. **Create Keycloak Client**:
+   - Go to Clients > Create client
+   - Client ID: `github-repo-viewer`
+   - Client type: Public
+   - Valid redirect URIs: `http://localhost:3001/*`
+   - Web origins: `http://localhost:3001`
 
 ## 🐳 Docker Commands
 
@@ -102,8 +119,17 @@ docker compose logs -f
 ## 🔍 Troubleshooting
 
 1. **Keycloak connection issues**: Verify Keycloak is running on localhost:8080
-2. **GitHub token issues**: Ensure token has `repo` scope
-3. **Port conflicts**: Make sure port 3001 is available
+2. **GitHub authentication fails**: Check GitHub OAuth App configuration and Keycloak identity provider setup
+3. **CORS issues**: Ensure web origins are properly configured in Keycloak client
+4. **Port conflicts**: Make sure port 3001 is available
+
+## 🏗️ Architecture
+
+This is a **frontend-only** application that:
+- Uses Keycloak as an authentication proxy to GitHub
+- Gets GitHub access tokens through Keycloak's token exchange
+- Makes direct API calls to GitHub from the browser
+- Requires no backend service or database
 
 ---
 

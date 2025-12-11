@@ -1,18 +1,28 @@
 import axios from 'axios';
-import { getToken, updateToken } from './keycloak';
+import keycloak from './keycloak';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+// GitHub API base URL
+const GITHUB_API_BASE_URL = 'https://api.github.com';
 
-// Create axios instance
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  withCredentials: true,
+// Create axios instance for GitHub API
+const githubApi = axios.create({
+  baseURL: GITHUB_API_BASE_URL,
 });
 
-// Request interceptor to add auth token
-api.interceptors.request.use(
+// Function to get GitHub token from Keycloak
+const getGitHubToken = () => {
+  if (keycloak.authenticated && keycloak.tokenParsed) {
+    // The GitHub token should be available in the Keycloak token
+    // This depends on how Keycloak is configured with GitHub identity provider
+    return keycloak.token;
+  }
+  return null;
+};
+
+// Request interceptor to add GitHub token
+githubApi.interceptors.request.use(
   async (config) => {
-    const token = getToken();
+    const token = getGitHubToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -24,7 +34,7 @@ api.interceptors.request.use(
 );
 
 // Response interceptor to handle token refresh
-api.interceptors.response.use(
+githubApi.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
@@ -33,16 +43,15 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const refreshed = await updateToken();
+        const refreshed = await keycloak.updateToken(30);
         if (refreshed) {
-          const token = getToken();
+          const token = getGitHubToken();
           originalRequest.headers.Authorization = `Bearer ${token}`;
-          return api(originalRequest);
+          return githubApi(originalRequest);
         }
       } catch (refreshError) {
         console.error('Token refresh failed:', refreshError);
-        // Redirect to login or handle as needed
-        window.location.reload();
+        keycloak.login();
       }
     }
 
@@ -50,19 +59,46 @@ api.interceptors.response.use(
   }
 );
 
-// API methods
-export const apiService = {
-  // Health check
-  health: () => api.get('/api/health'),
+// GitHub API methods
+export const githubAPI = {
+  // Get user repositories
+  getRepositories: async () => {
+    try {
+      const response = await githubApi.get('/user/repos', {
+        params: {
+          sort: 'updated',
+          per_page: 100,
+          type: 'all'
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching repositories:', error);
+      throw error;
+    }
+  },
 
-  // User info
-  getUser: () => api.get('/api/user'),
+  // Get user profile
+  getUserProfile: async () => {
+    try {
+      const response = await githubApi.get('/user');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      throw error;
+    }
+  },
 
-  // GitHub repositories
-  getRepos: () => api.get('/api/repos'),
-
-  // GitHub user info
-  getGitHubUser: () => api.get('/api/github/user'),
+  // Get repository details
+  getRepository: async (owner, repo) => {
+    try {
+      const response = await githubApi.get(`/repos/${owner}/${repo}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching repository details:', error);
+      throw error;
+    }
+  }
 };
 
-export default api;
+export default githubAPI;

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useKeycloak } from '../hooks/useKeycloak.jsx';
+import { loginWithGitHub } from '../services/keycloak';
 
 const LoginPage = () => {
   const { login, loading, error } = useKeycloak();
@@ -34,13 +35,16 @@ const LoginPage = () => {
       <h1>GitHub Repository Viewer</h1>
       <p>Welcome! Please log in to view your GitHub repositories.</p>
       <div className="card">
-        <h2>🔐 Secure Authentication</h2>
+        <h2>🔐 GitHub Authentication</h2>
         <p>
-          This application uses Keycloak for secure authentication.
+          This application uses Keycloak with GitHub integration for secure authentication.
           Once logged in, you'll be able to view and manage your GitHub repositories.
         </p>
-        <button onClick={login} className="login-button">
-          Login with Keycloak
+        <button onClick={loginWithGitHub} className="login-button github-login">
+          🐙 Login with GitHub
+        </button>
+        <button onClick={login} className="login-button keycloak-login">
+          🔐 Login with Keycloak
         </button>
       </div>
       <div className="card">

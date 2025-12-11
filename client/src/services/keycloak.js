@@ -1,23 +1,21 @@
 import Keycloak from 'keycloak-js';
 
-let keycloak = null;
+// Keycloak configuration - can be moved to environment variables
+const keycloakConfig = {
+  url: import.meta.env.VITE_KEYCLOAK_URL || 'http://localhost:8080',
+  realm: import.meta.env.VITE_KEYCLOAK_REALM || 'master',
+  clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID || 'github-repo-viewer',
+};
+
+const keycloak = new Keycloak(keycloakConfig);
 
 const initKeycloak = async () => {
   try {
-    // Get Keycloak configuration from backend
-    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/keycloak-config`);
-    const config = await response.json();
-
-    keycloak = new Keycloak({
-      url: config.url,
-      realm: config.realm,
-      clientId: config.clientId,
-    });
-
     const authenticated = await keycloak.init({
       onLoad: 'check-sso',
       silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
       pkceMethod: 'S256',
+      checkLoginIframe: false, // Disable iframe for GitHub integration
     });
 
     return { keycloak, authenticated };
@@ -32,6 +30,14 @@ const getKeycloak = () => keycloak;
 const login = () => {
   if (keycloak) {
     keycloak.login();
+  }
+};
+
+const loginWithGitHub = () => {
+  if (keycloak) {
+    keycloak.login({
+      idpHint: 'github' // This tells Keycloak to use GitHub identity provider
+    });
   }
 };
 
@@ -77,9 +83,12 @@ export {
   initKeycloak,
   getKeycloak,
   login,
+  loginWithGitHub,
   logout,
   getToken,
   isAuthenticated,
   getUserInfo,
   updateToken,
 };
+
+export default keycloak;

@@ -1,62 +1,40 @@
-# Multi-stage Dockerfile for GitHub Repository Viewer
-# Stage 1: Build the React frontend
-FROM node:18-alpine AS frontend-builder
+# Frontend-only build for static serving
+FROM node:18-alpine AS builder
 
-WORKDIR /app/client
-
-# Copy client package files
-COPY client/package*.json ./
-
-# Install client dependencies (including dev dependencies for build)
-RUN npm ci
-
-# Copy client source code
-COPY client/ ./
-
-# Build the React application
-RUN npm run build
-
-# Stage 2: Build the backend and serve the application
-FROM node:18-alpine AS production
-
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
-
-# Create app directory
+# Set working directory
 WORKDIR /app
 
-# Create non-root user for security
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nextjs -u 1001
+# Copy package files
+COPY client/package*.json ./
 
-# Copy server package files
-COPY server/package*.json ./server/
+# Install dependencies
+RUN npm ci
 
-# Install server dependencies
-WORKDIR /app/server
-RUN npm ci --only=production && npm cache clean --force
+# Copy source code
+COPY client/ ./
 
-# Copy server source code
-COPY server/ ./
+# Build for production
+RUN npm run build
 
-# Copy built frontend from previous stage
-COPY --from=frontend-builder /app/client/dist ./public
+# Production stage with nginx
+FROM nginx:alpine
 
-# Set permissions
-RUN chown -R nextjs:nodejs /app
+# Copy built files to nginx
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Switch to non-root user
-USER nextjs
+# Create nginx configuration for SPA
+RUN echo 'server {' > /etc/nginx/conf.d/default.conf && \
+    echo '    listen 80;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    server_name localhost;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    root /usr/share/nginx/html;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    index index.html;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    location / {' >> /etc/nginx/conf.d/default.conf && \
+    echo '        try_files $uri $uri/ /index.html;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    }' >> /etc/nginx/conf.d/default.conf && \
+    echo '}' >> /etc/nginx/conf.d/default.conf
 
-# Expose the port the app runs on
-EXPOSE 3001
+# Expose port
+EXPOSE 80
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3001/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
-
-# Use dumb-init to handle signals properly
-ENTRYPOINT ["dumb-init", "--"]
-
-# Start the application
-CMD ["node", "index.js"]
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]
