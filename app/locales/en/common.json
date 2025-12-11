@@ -1,0 +1,32 @@
+{
+  "app": {
+    "title": "GitHub Repository Viewer",
+    "subtitle": "View and manage your GitHub repositories"
+  },
+  "auth": {
+    "login": "Login with GitHub",
+    "logout": "Logout",
+    "loginError": "Failed to authenticate with GitHub",
+    "welcome": "Welcome back, {{name}}!"
+  },
+  "repositories": {
+    "title": "Your Repositories",
+    "count": "{{count}} repositories",
+    "noRepos": "No repositories found",
+    "loading": "Loading repositories...",
+    "error": "Failed to load repositories",
+    "private": "Private",
+    "fork": "Fork",
+    "archived": "Archived",
+    "language": "Language",
+    "stars": "Stars",
+    "forks": "Forks",
+    "updated": "Updated {{date}}"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "close": "Close"
+  }
+}

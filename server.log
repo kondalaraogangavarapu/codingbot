@@ -1,0 +1,12 @@
+127.0.0.1 - - [11/Dec/2025 02:07:33] "HEAD / HTTP/1.1" 200 -
+127.0.0.1 - - [11/Dec/2025 02:07:35] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [11/Dec/2025 02:07:35] "GET /assets/manifest-26c1d9d7.js HTTP/1.1" 200 -
+127.0.0.1 - - [11/Dec/2025 02:07:35] "GET /assets/jsx-runtime-DSTfpXA4.js HTTP/1.1" 200 -
+127.0.0.1 - - [11/Dec/2025 02:07:35] "GET /assets/root-jXkPj04a.js HTTP/1.1" 200 -
+127.0.0.1 - - [11/Dec/2025 02:07:35] "GET /assets/context-BlY-Vu1N.js HTTP/1.1" 200 -
+127.0.0.1 - - [11/Dec/2025 02:07:35] "GET /assets/entry.client-DneiKG2F.js HTTP/1.1" 200 -
+127.0.0.1 - - [11/Dec/2025 02:07:35] "GET /assets/components-ZggwPGbr.js HTTP/1.1" 200 -
+127.0.0.1 - - [11/Dec/2025 02:07:35] "GET /assets/_index-BxVgdMvE.js HTTP/1.1" 200 -
+127.0.0.1 - - [11/Dec/2025 02:07:35] "GET /assets/root-DuWPw1dz.css HTTP/1.1" 200 -
+127.0.0.1 - - [11/Dec/2025 02:07:35] code 404, message File not found
+127.0.0.1 - - [11/Dec/2025 02:07:35] "GET /realms/github-realm/protocol/openid-connect/3p-cookies/step1.html HTTP/1.1" 404 -
