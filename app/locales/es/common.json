@@ -1,0 +1,32 @@
+{
+  "app": {
+    "title": "Visor de Repositorios de GitHub",
+    "subtitle": "Ve y gestiona tus repositorios de GitHub"
+  },
+  "auth": {
+    "login": "Iniciar sesión con GitHub",
+    "logout": "Cerrar sesión",
+    "loginError": "Error al autenticar con GitHub",
+    "welcome": "¡Bienvenido de vuelta, {{name}}!"
+  },
+  "repositories": {
+    "title": "Tus Repositorios",
+    "count": "{{count}} repositorios",
+    "noRepos": "No se encontraron repositorios",
+    "loading": "Cargando repositorios...",
+    "error": "Error al cargar repositorios",
+    "private": "Privado",
+    "fork": "Fork",
+    "archived": "Archivado",
+    "language": "Lenguaje",
+    "stars": "Estrellas",
+    "forks": "Forks",
+    "updated": "Actualizado {{date}}"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Ocurrió un error",
+    "retry": "Reintentar",
+    "close": "Cerrar"
+  }
+}
