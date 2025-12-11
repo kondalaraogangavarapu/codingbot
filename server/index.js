@@ -3,6 +3,7 @@ const cors = require('cors');
 const session = require('express-session');
 const axios = require('axios');
 const jwt = require('jsonwebtoken');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -223,9 +224,25 @@ app.get('/api/keycloak-config', (req, res) => {
   });
 });
 
+// Serve static files from React build (for production)
+if (process.env.NODE_ENV === 'production') {
+  // Serve static files
+  app.use(express.static(path.join(__dirname, 'public')));
+  
+  // Handle React routing, return all requests to React app
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  });
+}
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`Keycloak URL: ${KEYCLOAK_URL}`);
   console.log(`Keycloak Realm: ${KEYCLOAK_REALM}`);
   console.log(`Keycloak Client ID: ${KEYCLOAK_CLIENT_ID}`);
+  
+  if (process.env.NODE_ENV === 'production') {
+    console.log(`Serving static files from: ${path.join(__dirname, 'public')}`);
+  }
 });

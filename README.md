@@ -25,16 +25,45 @@ A modern web application that allows users to authenticate via Keycloak and view
 - **Keycloak JS** - Frontend authentication adapter
 - **Axios** - HTTP client
 
-## Prerequisites
+## 🚀 Quick Start
 
-Before running this application, make sure you have:
+### Option 1: Docker (Recommended) 🐳
+
+The easiest way to run the application is using Docker:
+
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd github-repo-viewer-keycloak
+
+# Quick start with Docker
+./scripts/docker-dev.sh setup
+```
+
+This will:
+- Set up the environment
+- Build Docker images  
+- Start all services (app + Keycloak)
+- Show you the URLs to access
+
+**Access the application:**
+- 🌐 Main App: http://localhost:3001
+- 🔐 Keycloak Admin: http://localhost:8080/admin (admin/admin123)
+
+📚 **For detailed Docker instructions, see [DOCKER_SETUP.md](DOCKER_SETUP.md)**
+
+### Option 2: Manual Installation
+
+#### Prerequisites
+
+Before running this application manually, make sure you have:
 
 1. **Node.js** (v18 or higher)
 2. **npm** (comes with Node.js)
 3. **Keycloak Server** running and configured
 4. **GitHub Personal Access Token** (optional, can be configured per user)
 
-## Installation & Setup
+## Manual Installation & Setup
 
 ### 1. Clone the Repository
 
@@ -180,6 +209,55 @@ npm start
    - Last updated date
    - Clone URL
    - Public/Private status
+
+## 🐳 Docker Deployment
+
+### Development with Docker
+
+```bash
+# Quick setup
+./scripts/docker-dev.sh setup
+
+# Other useful commands
+./scripts/docker-dev.sh start    # Start services
+./scripts/docker-dev.sh logs     # View logs
+./scripts/docker-dev.sh status   # Check status
+./scripts/docker-dev.sh stop     # Stop services
+```
+
+### Production with Docker
+
+```bash
+# Production deployment
+./scripts/docker-prod.sh setup
+./scripts/docker-prod.sh deploy
+
+# Production management
+./scripts/docker-prod.sh monitor  # Monitoring dashboard
+./scripts/docker-prod.sh backup   # Create backup
+./scripts/docker-prod.sh scale github-repo-viewer 3  # Scale to 3 replicas
+```
+
+### Docker Compose Services
+
+- **github-repo-viewer**: Main application (React + Express)
+- **keycloak**: Authentication server
+- **nginx**: Reverse proxy (production only)
+
+### Environment Configuration
+
+Create `.env.docker.local` from the template:
+```bash
+cp .env.docker .env.docker.local
+# Edit with your actual values
+```
+
+Key variables to update:
+- `SESSION_SECRET`: Strong random string (32+ characters)
+- `GITHUB_TOKEN`: Your GitHub Personal Access Token
+- `KEYCLOAK_ADMIN_PASSWORD`: Change from default
+
+📚 **For complete Docker documentation, see [DOCKER_SETUP.md](DOCKER_SETUP.md)**
 
 ## API Endpoints
 
